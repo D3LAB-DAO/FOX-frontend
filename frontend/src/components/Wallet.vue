@@ -13,7 +13,7 @@ export default {
       btnText: "Connect to wallet",
       btnTooltip: "Connect to wallet",
 
-      weth: ethers.BigNumber.from(0),
+      wmatic: ethers.BigNumber.from(0),
       foxs: ethers.BigNumber.from(0),
       fox: ethers.BigNumber.from(0),
 
@@ -21,13 +21,13 @@ export default {
     };
   },
   computed: {
-    formattedWETH: {
+    formattedWMATIC: {
       get() {
-        let res = ethers.utils.formatEther(this.weth);
+        let res = ethers.utils.formatEther(this.wmatic);
         return (+res).toFixed(4);
       },
       set(value) {
-        this.weth = ethers.utils.parseUnits(value, "ether");
+        this.wmatic = ethers.utils.parseUnits(value, "ether");
       },
     },
     formattedFOXS: {
@@ -85,8 +85,8 @@ export default {
     },
     updateBalance: function () {
       if (getAccount() === "" || !this.connected) return;
-      getBalance("WETH").then((result) => {
-        this.weth = result;
+      getBalance("WMATIC").then((result) => {
+        this.wmatic = result;
       });
       getBalance("FOXS").then((result) => {
         this.foxs = result;
@@ -111,9 +111,9 @@ export default {
       }}</span>
     </button>
     <div class="uk-text-center wrap-top" uk-grid>
-      <button class="uk-width-1-3 uk-button balance-button" @click="addToken('WETH')">
+      <button class="uk-width-1-3 uk-button balance-button" @click="addToken('WMATIC')">
         <span style="display: block; overflow: hidden; text-overflow: ellipsis">
-          <img src="../img/bnb-icon.png" style="width: 20px" /> {{ formattedWETH }}</span
+          <img src="../img/polygon-icon.png" style="width: 20px" /> {{ formattedWMATIC }}</span
         >
       </button>
       <button class="uk-width-1-3 uk-button balance-button" @click="addToken('FOXS')">

@@ -6,7 +6,7 @@ import {
   getAllowance,
   getdefaultValuesRecollateralize,
   getLtvRangeWhenRecollateralize,
-  getWethRangeWhenRecollateralize,
+  getWmaticRangeWhenRecollateralize,
   getShareAmountInRecollateralize,
   recollateralize,
   getTrustLevel,
@@ -18,17 +18,17 @@ export default {
   data() {
     return {
       connected: false,
-      approval_weth: false,
+      approval_wmatic: false,
 
       cdp: "",
-      weth: ethers.BigNumber.from("0"),
+      wmatic: ethers.BigNumber.from("0"),
       ltv: 0,
       foxs: ethers.BigNumber.from("0"),
 
-      weth_format: "",
+      wmatic_format: "",
       foxs_format: "",
 
-      bWethWrongRange: false,
+      bWmaticWrongRange: false,
       bLtvWrongRange: false,
 
       trustLevel: 0,
@@ -36,16 +36,16 @@ export default {
     };
   },
   computed: {
-    formattedWETH: {
+    formattedWMATIC: {
       get() {
-        if (this.weth_format === "") return "";
-        return this.weth_format;
+        if (this.wmatic_format === "") return "";
+        return this.wmatic_format;
       },
       set(value) {
         let sValue = value.toString();
-        this.weth_format = sValue;
+        this.wmatic_format = sValue;
         if (sValue === "") sValue = "0";
-        this.weth = ethers.utils.parseUnits(sValue, "ether");
+        this.wmatic = ethers.utils.parseUnits(sValue, "ether");
         //this.checkRange();
       },
     },
@@ -88,9 +88,9 @@ export default {
   },
   methods: {
     checkAllowance: function () {
-      getAllowance("WETH").then((allowance_weth) => {
-        if (allowance_weth != 0) {
-          this.approval_weth = true;
+      getAllowance("WMATIC").then((allowance_wmatic) => {
+        if (allowance_wmatic != 0) {
+          this.approval_wmatic = true;
         }
       });
     },
@@ -117,18 +117,18 @@ export default {
       });
     },
     approveOnClick: function () {
-      if (!this.approval_weth) {
+      if (!this.approval_wmatic) {
         this.emitter.emit("loading-event", true);
-        approveMax("WETH").then((success) => {
+        approveMax("WMATIC").then((success) => {
           this.emitter.emit("loading-event", false);
-          if (success) this.approval_weth = true;
-          else this.approval_weth = false;
+          if (success) this.approval_wmatic = true;
+          else this.approval_wmatic = false;
         });
       }
     },
     RecollateralizeOnClick: function () {
       this.emitter.emit("loading-event", true);
-      recollateralize(this.cdp, this.weth, this.ltv).then((result) => {
+      recollateralize(this.cdp, this.wmatic, this.ltv).then((result) => {
         this.emitter.emit("loading-event", false);
         if (result) console.log("recollateralize success!");
         else console.log("recollateralize failed!");
@@ -136,22 +136,22 @@ export default {
     },
     changeCDP: function () {
       getdefaultValuesRecollateralize(this.cdp).then((result) => {
-        this.setWETH(result.collateralAmount_);
+        this.setWMATIC(result.collateralAmount_);
         this.ltv = result.ltv_;
         this.setFOXS(result.shareAmount_);
       });
     },
-    setWETH: function (bigint_) {
-      this.weth = ethers.BigNumber.from(bigint_);
-      this.weth_format = ethers.utils.formatEther(ethers.BigNumber.from(bigint_));
+    setWMATIC: function (bigint_) {
+      this.wmatic = ethers.BigNumber.from(bigint_);
+      this.wmatic_format = ethers.utils.formatEther(ethers.BigNumber.from(bigint_));
     },
     setFOXS: function (bigint_) {
       this.foxs = ethers.BigNumber.from(bigint_);
       this.foxs_format = ethers.utils.formatEther(ethers.BigNumber.from(bigint_));
     },
-    updateMaxWethOnClick: async function () {
-      this.updateMaxWETH().then((result) => {
-        this.inputWETH();
+    updateMaxWmaticOnClick: async function () {
+      this.updateMaxWMATIC().then((result) => {
+        this.inputWMATIC();
       });
     },
     updateMaxLtvOnClick: async function () {
@@ -159,17 +159,17 @@ export default {
         this.inputLTV();
       });
     },
-    updateMaxWETH: async function () {
-      return getWethRangeWhenRecollateralize(this.cdp, this.ltv).then((wethRange) => {
-        this.setWETH(wethRange.upperBound_);
+    updateMaxWMATIC: async function () {
+      return getWmaticRangeWhenRecollateralize(this.cdp, this.ltv).then((wmaticRange) => {
+        this.setWMATIC(wmaticRange.upperBound_);
       });
     },
     updateMaxLTV: async function () {
-      return getLtvRangeWhenRecollateralize(this.cdp, this.weth).then((ltvRange) => {
+      return getLtvRangeWhenRecollateralize(this.cdp, this.wmatic).then((ltvRange) => {
         this.ltv = ltvRange.upperBound_;
       });
     },
-    inputWETH: async function (event) {
+    inputWMATIC: async function (event) {
       this.updateFoxs().then((result) => {
         this.checkRange(event);
       });
@@ -180,7 +180,7 @@ export default {
       });
     },
     updateFoxs: async function () {
-      return getShareAmountInRecollateralize(this.cdp, this.weth, this.ltv).then(
+      return getShareAmountInRecollateralize(this.cdp, this.wmatic, this.ltv).then(
         (result) => {
           console.log("getShareAmountInRecollateralize", result);
           this.setFOXS(ethers.BigNumber.from(result));
@@ -188,19 +188,19 @@ export default {
       );
     },
     checkRange: async function (event) {
-      // Weth range check
-      getWethRangeWhenRecollateralize(this.cdp, this.ltv).then((wethRange) => {
-        let upperBound = ethers.BigNumber.from(wethRange.upperBound_);
-        let lowerBound = ethers.BigNumber.from(wethRange.lowerBound_);
-        this.bWethWrongRange =
+      // Wmatic range check
+      getWmaticRangeWhenRecollateralize(this.cdp, this.ltv).then((wmaticRange) => {
+        let upperBound = ethers.BigNumber.from(wmaticRange.upperBound_);
+        let lowerBound = ethers.BigNumber.from(wmaticRange.lowerBound_);
+        this.bWmaticWrongRange =
           (event !== undefined && parseInt(event.target.value) < 0) ||
-          this.weth.gt(upperBound) ||
-          this.weth.lt(lowerBound);
-        console.log(this.bWethWrongRange, "WETH RANGE!!! ", upperBound, lowerBound);
+          this.wmatic.gt(upperBound) ||
+          this.wmatic.lt(lowerBound);
+        console.log(this.bWmaticWrongRange, "WMATIC RANGE!!! ", upperBound, lowerBound);
       });
 
       // ltv range check
-      getLtvRangeWhenRecollateralize(this.cdp, this.weth).then((ltvRange) => {
+      getLtvRangeWhenRecollateralize(this.cdp, this.wmatic).then((ltvRange) => {
         let upperBound = ltvRange.upperBound_; // should be <=
         let lowerBound = ltvRange.lowerBound_; // should be >
         this.bLtvWrongRange =
@@ -270,16 +270,16 @@ export default {
       <div class="uk-inline form-icon">
         <a
           class="uk-form-icon uk-form-icon-flip input-form-icon"
-          @click="updateMaxWethOnClick()"
-          ><img src="../img/bnb-icon.png" style="width: 20px" /><span>BNB</span></a
+          @click="updateMaxWmaticOnClick()"
+          ><img src="../img/polygon-icon.png" style="width: 20px" /><span>MATIC</span></a
         >
         <input
           class="uk-input input-form uk-form-width-medium uk-form-large"
-          :class="{ wrong: bWethWrongRange }"
+          :class="{ wrong: bWmaticWrongRange }"
           type="number"
           min="0"
-          v-model="formattedWETH"
-          @input="inputWETH($event)"
+          v-model="formattedWMATIC"
+          @input="inputWMATIC($event)"
           :disabled="cdp === ''"
         />
       </div>
@@ -300,7 +300,7 @@ export default {
           />
         </div>
       </div>
-      <div v-if="bWethWrongRange || bLtvWrongRange" class="description">
+      <div v-if="bWmaticWrongRange || bLtvWrongRange" class="description">
         <span style="font-weight: bold; color: red">WRONG VALUE!</span>
       </div>
       <div v-else class="description">
@@ -329,7 +329,7 @@ export default {
         />
       </div>
       <hr />
-      <div v-if="approval_weth">
+      <div v-if="approval_wmatic">
         <button
           class="uk-button uk-button-default uk-button-large form-button"
           @click="RecollateralizeOnClick"
@@ -342,7 +342,7 @@ export default {
           class="uk-button uk-button-default uk-button-large form-button"
           @click="approveOnClick"
         >
-          Approve(WETH)
+          Approve(WMATIC)
         </button>
       </div>
       <div v-else>

@@ -20,25 +20,25 @@ export default {
 
       cdp: "",
       foxs: ethers.BigNumber.from("0"),
-      weth: ethers.BigNumber.from("0"),
+      wmatic: ethers.BigNumber.from("0"),
       ltv: 0,
 
       fox_format: "",
-      weth_format: "",
+      wmatic_format: "",
       foxs_format: "",
     };
   },
   computed: {
-    formattedWETH: {
+    formattedWMATIC: {
       get() {
-        if (this.weth_format === "") return "";
-        return this.weth_format;
+        if (this.wmatic_format === "") return "";
+        return this.wmatic_format;
       },
       set(value) {
         let sValue = value.toString();
-        this.weth_format = sValue;
+        this.wmatic_format = sValue;
         if (sValue === "") sValue = "0";
-        this.weth = ethers.utils.parseUnits(sValue, "ether");
+        this.wmatic = ethers.utils.parseUnits(sValue, "ether");
       },
     },
     formattedLTV: {
@@ -137,7 +137,7 @@ export default {
     },
     inputFOXS: function () {
       getCollateralAmount(this.cdp, this.foxs, this.ltv).then((result) => {
-        this.weth = result;
+        this.wmatic = result;
       });
     },
     inputLTV: function () {
@@ -207,13 +207,13 @@ export default {
       </div>
       <div class="uk-inline form-icon">
         <a class="uk-form-icon uk-form-icon-flip input-form-icon"
-          ><img src="../img/bnb-icon.png" style="width: 20px" /><span>BNB</span></a
+          ><img src="../img/polygon-icon.png" style="width: 20px" /><span>MATIC</span></a
         >
         <input
           readonly
           class="uk-input result-form uk-form-width-medium uk-form-large"
           type="number"
-          v-model="formattedWETH"
+          v-model="formattedWMATIC"
         />
       </div>
       <div class="wrap">

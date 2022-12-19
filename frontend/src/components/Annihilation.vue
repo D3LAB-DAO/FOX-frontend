@@ -70,7 +70,7 @@ export default {
           readonly
           class="uk-input result-form uk-form-width-medium uk-form-large"
           type="number"
-          v-model="formattedWETH"
+          v-model="formattedWMATIC"
         />
       </div>
       <hr />

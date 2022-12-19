@@ -3,12 +3,11 @@
  */
 import detectEthereumProvider from '@metamask/detect-provider';
 import { ethers } from "ethers";
-import { FOX_CONTRACT_ADDR, FOX_CONTRACT_ABI, FOXFARM_CONTRACT_ADDR, FOXFARM_CONTRACT_ABI, WETH_CONTRACT_ADDR, FOXS_CONTRACT_ADDR, SIN_CONTRACT_ADDR, GATEWAY_CONTRACT_ADDR, WETH_CONTRACT_ABI, FOXS_CONTRACT_ABI, SIN_CONTRACT_ABI, GATEWAY_CONTRACT_ABI } from "./contract.js"
+import { FOX_CONTRACT_ADDR, FOX_CONTRACT_ABI, FOXFARM_CONTRACT_ADDR, FOXFARM_CONTRACT_ABI, WMATIC_CONTRACT_ADDR, FOXS_CONTRACT_ADDR, SIN_CONTRACT_ADDR, GATEWAY_CONTRACT_ADDR, WMATIC_CONTRACT_ABI, FOXS_CONTRACT_ABI, SIN_CONTRACT_ABI, GATEWAY_CONTRACT_ABI } from "./contract.js"
 import { approveMax_contract, openAndDepositAndBorrow_contract, RepayAndWithdraw_contract, buybackRepayDebt_contract, recollateralize_contract, allowance_contract, requiredShareAmountFromCollateralToLtv_contract, requiredCollateralAmountFromShareToLtv_contract, expectedMintAmountToLtv_contract, defaultValuesMint_contract, defaultValueRedeem_contract, defaultValuesRecollateralize_contract, expectedRedeemAmountToLtv_contract, balanceOf_contract, exchangedCollateralAmountFromShareToLtv_contract, exchangedShareAmountFromCollateralToLtv_contract, trustLevel_contract, maxLTV_contract, ltvRangeWhenMint_contract, shareAmountRangeWhenMint_contract, collateralAmountRangeWhenMint_contract, ltvRangeWhenRedeem_contract, stableAmountRangeWhenRedeem_contract, ltvRangeWhenBuyback_contract, shareAmountRangeWhenBuyback_contract, ltvRangeWhenRecollateralize_contract, collateralAmountRangeWhenRecollateralize_contract } from "./contract_request.js"
-const binanceTestChainId = '0x61';
-const binanceMainChainId = '0x56';
-const binanceRPCUrl = 'https://data-seed-prebsc-1-s3.binance.org:8545/';
-const binanceBlockExploreUrl = 'https://testnet.bscscan.com';
+const testChainId = '0x13881';
+const RPCUrl = 'https://matic-mumbai.chainstacklabs.com';
+const blockExploreUrl = 'https://mumbai.polygonscan.com';
 const localhostRPCUrl = 'http://localhost:8545';
 const localhostChainId = '0x7A69'; // 31337
 const ETHERS_MAX = ethers.constants.MaxUint256;
@@ -16,7 +15,7 @@ const ETHERS_MAX = ethers.constants.MaxUint256;
 let account = '';
 let contract_fox = '';
 let contract_foxfarm = '';
-let contract_weth = '';
+let contract_wmatic = '';
 let contract_foxs = '';
 let contract_sin = '';
 let contract_gateway = '';
@@ -29,7 +28,7 @@ async function connectContract() {
     window.web3 = new Web3(window.ethereum);
     contract_fox = await new window.web3.eth.Contract(FOX_CONTRACT_ABI, FOX_CONTRACT_ADDR);
     contract_foxfarm = await new window.web3.eth.Contract(FOXFARM_CONTRACT_ABI, FOXFARM_CONTRACT_ADDR);
-    contract_weth = await new window.web3.eth.Contract(WETH_CONTRACT_ABI, WETH_CONTRACT_ADDR);
+    contract_wmatic = await new window.web3.eth.Contract(WMATIC_CONTRACT_ABI, WMATIC_CONTRACT_ADDR);
     contract_foxs = await new window.web3.eth.Contract(FOXS_CONTRACT_ABI, FOXS_CONTRACT_ADDR);
     contract_sin = await new window.web3.eth.Contract(SIN_CONTRACT_ABI, SIN_CONTRACT_ADDR);
     contract_gateway = await new window.web3.eth.Contract(GATEWAY_CONTRACT_ABI, GATEWAY_CONTRACT_ADDR);
@@ -45,7 +44,7 @@ async function connectMetamask() {
         try {
             await provider.request({
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: binanceTestChainId }],
+                params: [{ chainId: testChainId }],
             });
             console.log("You have succefully switched to Binance Test network");
 
@@ -65,12 +64,12 @@ async function connectMetamask() {
                         method: 'wallet_addEthereumChain',
                         params: [
                             {
-                                chainId: binanceTestChainId,
-                                chainName: 'Binance Smart Chain Testnet',
-                                rpcUrls: [binanceRPCUrl],
-                                blockExplorerUrls: [binanceBlockExploreUrl],
+                                chainId: testChainId,
+                                chainName: 'Mumbai',
+                                rpcUrls: [RPCUrl],
+                                blockExplorerUrls: [blockExploreUrl],
                                 nativeCurrency: {
-                                    symbol: 'tBNB',
+                                    symbol: 'MATIC',
                                     decimals: 18
                                 }
                             }
@@ -80,7 +79,7 @@ async function connectMetamask() {
                     // connect
                     await provider.request({
                         method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: binanceTestChainId }],
+                        params: [{ chainId: testChainId }],
                     });
                     console.log("You have succefully switched to Binance Test network");
 
@@ -140,20 +139,20 @@ function getAccount() {
 function getContract(contractName) {
     if (contractName === "FOX") return contract_fox;
     else if (contractName === "FOXFARM") return contract_foxfarm;
-    else if (contractName === "WETH") return contract_weth;
+    else if (contractName === "WMATIC") return contract_wmatic;
     else if (contractName === "FOXS") return contract_foxs;
     else if (contractName === "SIN") return contract_sin;
     else if (contractName === "GATEWAY") return contract_gateway;
 }
 
 function getContractImg(contractName) {
-    if (contractName === "WETH") return 'https://github.com/FOX-Finance/FOX-frontend/blob/main/frontend/src/img/bnb-icon.png?raw=true';
+    if (contractName === "WMATIC") return 'https://github.com/D3LAB-DAO/FOX-frontend/blob/polygon/frontend/src/img/polygon-icon.png?raw=true';
     else if (contractName === "FOXS") return 'https://github.com/FOX-Finance/FOX-frontend/blob/main/frontend/src/img/foxs-icon.png?raw=true';
     else if (contractName === "FOX") return 'https://github.com/FOX-Finance/FOX-frontend/blob/main/frontend/src/img/fox-icon.png?raw=true';
 }
 
 function getApproveAddress(contractName) {
-    if (contractName === "WETH") return FOXFARM_CONTRACT_ADDR;
+    if (contractName === "WMATIC") return FOXFARM_CONTRACT_ADDR;
     else if (contractName === "FOXS") return FOXFARM_CONTRACT_ADDR;
     else if (contractName === "FOX") return FOXFARM_CONTRACT_ADDR;
 }
@@ -308,7 +307,7 @@ async function getFoxsRangeWhenMint(cdpID, collateralAmount, ltv) {
     return response;
 }
 
-async function getWethRangeWhenMint(cdpID, ltv, shareAmount) {
+async function getWmaticRangeWhenMint(cdpID, ltv, shareAmount) {
     let _contract = getContract("GATEWAY");
     if (_contract === '' || getAccount() === '') return 0;
     let response = await collateralAmountRangeWhenMint_contract(_contract, getAccount(), cdpID, ltv, shareAmount);
@@ -350,11 +349,11 @@ async function getLtvRangeWhenRecollateralize(cdpID, collateralAmount) {
     return response;
 }
 
-async function getWethRangeWhenRecollateralize(cdpID, ltv) {
+async function getWmaticRangeWhenRecollateralize(cdpID, ltv) {
     let _contract = getContract("GATEWAY");
     if (_contract === '' || getAccount() === '') return 0;
     let response = await collateralAmountRangeWhenRecollateralize_contract(_contract, getAccount(), cdpID, ltv);
     return response;
 }
 
-export { ETHERS_MAX, connectContract, connectMetamask, addTokenToMetamask, getAccount, approveMax, openAndDepositAndBorrow, redeem, buyback, recollateralize, getBalance, getAllowance, getShareAmount, getDebtAmount, getMintAmount, getdefaultValuesMint, getdefaultValuesRedeem, getdefaultValuesRecollateralize, getRedeemAmount, getCollateralAmount, getShareAmountInRecollateralize, getTrustLevel, getMaxLTV, getLtvRangeWhenMint, getFoxsRangeWhenMint, getWethRangeWhenMint, getLtvRangeWhenRedeem, getFoxRangeWhenRedeem, getLtvRangeWhenBuyback, getShareAmountRangeWhenBuyback, getLtvRangeWhenRecollateralize, getWethRangeWhenRecollateralize };
+export { ETHERS_MAX, connectContract, connectMetamask, addTokenToMetamask, getAccount, approveMax, openAndDepositAndBorrow, redeem, buyback, recollateralize, getBalance, getAllowance, getShareAmount, getDebtAmount, getMintAmount, getdefaultValuesMint, getdefaultValuesRedeem, getdefaultValuesRecollateralize, getRedeemAmount, getCollateralAmount, getShareAmountInRecollateralize, getTrustLevel, getMaxLTV, getLtvRangeWhenMint, getFoxsRangeWhenMint, getWmaticRangeWhenMint, getLtvRangeWhenRedeem, getFoxRangeWhenRedeem, getLtvRangeWhenBuyback, getShareAmountRangeWhenBuyback, getLtvRangeWhenRecollateralize, getWmaticRangeWhenRecollateralize };
